@@ -51,18 +51,26 @@ angular.module('ui.dashboard')
         // Save default widget config for reset
         scope.defaultWidgets = scope.options.defaultWidgets;
         
-        //scope.widgetDefs = scope.options.widgetDefinitions;
-        scope.widgetDefs = new WidgetDefCollection(scope.options.widgetDefinitions);
-        var count = 1;
 
-        // Instantiate new instance of dashboard state
-        scope.dashboardState = new DashboardState(
-          scope.options.storage,
-          scope.options.storageId,
-          scope.options.storageHash,
-          scope.widgetDefs,
-          scope.options.stringifyStorage
-        );
+          //CW added code to the link function with an init function for the definitions
+          // this function is then reused in the loadWidgets function
+        var initDefs = function (definitions) {
+            //scope.widgetDefs = scope.options.widgetDefinitions;
+            scope.widgetDefs = new WidgetDefCollection(definitions);
+
+            // Instantiate new instance of dashboard state
+            scope.dashboardState = new DashboardState(
+              scope.options.storage,
+              scope.options.storageId,
+              scope.options.storageHash,
+              scope.widgetDefs,
+              scope.options.stringifyStorage
+            );
+        }
+
+        initDefs(scope.options.widgetDefinitions);
+
+        
 
         /**
          * Instantiates a new widget on the dashboard
@@ -201,13 +209,17 @@ angular.module('ui.dashboard')
          * @param  {Array} widgets Array of definition objects
          */
         scope.loadWidgets = function (widgets) {
-          // AW dashboards are continuously saved today (no "save" button).
-          //scope.defaultWidgets = widgets;
-          scope.savedWidgetDefs = widgets;
-          scope.clear(true);
-          _.each(widgets, function (widgetDef) {
-            scope.addWidget(widgetDef, true);
-          });
+            // AW dashboards are continuously saved today (no "save" button).
+            //scope.defaultWidgets = widgets;
+            scope.savedWidgetDefs = widgets;
+            scope.clear(true);
+
+            //CW initialize the defintions as well
+            initDefs(widgets);
+
+            _.each(widgets, function (widgetDef) {
+                scope.addWidget(widgetDef, true);
+            });
         };
 
         /**
